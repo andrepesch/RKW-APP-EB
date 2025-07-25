@@ -9,17 +9,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.rkwthringenapp.data.FormSummary
+import com.example.rkwthringenapp.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -155,42 +157,78 @@ fun DashboardScreen(
 @Composable
 fun FormCard(form: FormSummary, onClick: () -> Unit, onShareClick: () -> Unit) {
     val isDraft = form.status == "entwurf"
-    val container = if (isDraft) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface
-    val textColor = if (isDraft) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+
+    val bottomBarColor = if (isDraft) App_Status_Entwurf_Bar else App_Status_Gesendet_Bar
+    val bottomTextColor = if (isDraft) App_Text_White else App_Text_Black
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = container),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            // Badge with scope and rate in the top-right corner
+            if (form.scopeInDays > 0 && form.dailyRate > 0) {
+                Text(
+                    text = "${form.scopeInDays} TW zu ${form.dailyRate} EUR",
+                    color = App_Text_White,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .background(
+                            color = App_Accent_Orange,
+                            shape = RoundedCornerShape(bottomStart = 12.dp)
+                        )
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+            }
+
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 48.dp)) {
                 Text(
                     text = form.companyName,
                     style = MaterialTheme.typography.titleMedium,
-                    color = textColor,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
+                    color = App_Text_Black,
+                    fontWeight = FontWeight.Bold
                 )
-                if (isDraft) {
-                    IconButton(onClick = onShareClick) {
-                        Icon(Icons.Outlined.Share, contentDescription = "Mit Kunde teilen", tint = textColor)
-                    }
+                if (form.address.isNotBlank()) {
+                    Text(
+                        text = extractCity(form.address),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = App_Text_Gray,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
             }
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(formatDate(form.updated_at), style = MaterialTheme.typography.bodySmall, color = textColor)
-                Text(if (isDraft) "Entwurf" else "Abgesendet", style = MaterialTheme.typography.bodySmall, color = textColor)
+
+            // Bottom status bar
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomStart)
+                    .background(bottomBarColor)
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+            ) {
+                Text(
+                    text = if (isDraft) "Entwurf" else "Gesendet",
+                    color = bottomTextColor,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp,
+                    modifier = Modifier.align(Alignment.CenterStart)
+                )
             }
         }
     }
+}
+
+private fun extractCity(address: String): String {
+    val afterComma = address.substringAfterLast(",").trim()
+    val parts = afterComma.split(" ")
+    return if (parts.isNotEmpty()) parts.last() else afterComma
 }
 
 fun formatDate(dateString: String): String {
