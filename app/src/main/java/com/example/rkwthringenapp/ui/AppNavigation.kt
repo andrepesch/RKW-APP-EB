@@ -23,7 +23,7 @@ fun AppNavigation() {
     NavHost(navController = navController, startDestination = startDestination) {
         composable("login") { LoginScreen(navController, authViewModel) }
         composable("register") { RegisterScreen(navController, authViewModel) }
-        composable("dashboard") { DashboardScreen(navController, authViewModel) }
+        composable("dashboard") { DashboardScreen(navController, authViewModel, rkwViewModel) }
 
         // Formular-Wizard
         composable("step1") { Step1Screen(navController, rkwViewModel) }
