@@ -20,5 +20,7 @@ data class FormSummary(
 data class LoginResponse(
     val status: String,
     val message: String,
-    val berater_id: Int? = null
+    val berater_id: Int? = null,
+    val salutation: String? = null,
+    val last_name: String? = null
 )

@@ -13,6 +13,12 @@ val App_Text_White = Color(0xFFFFFFFF)
 val App_Text_Gray = Color(0xFFB0B0B0)      // Ein weicheres Grau für sekundären Text
 val App_Error_Red = Color(0xFFCF6679)       // Eine an das Dark-Theme angepasste Fehlerfarbe
 
+// Helles Farbschema für ein freundliches Design
+val App_Background_Light = Color(0xFFFFFBFE) // Sehr helles Off-White als Hintergrund
+val App_Surface_Light = Color(0xFFFFFFFF)    // Weiße Fläche für Karten und Dialoge
+val App_Text_Black = Color(0xFF000000)
+val App_Text_DarkGray = Color(0xFF444444)    // Für weniger hervorgehobenen Text
+
 // Farben für die Status-Leisten
 val App_Status_Gesendet_Bar = Color(0xFFA9C5C9) // Sanftes Blau-Grau für Gesendet
 val App_Status_Entwurf_Bar = Color(0xFF4A5568)  // Dunkles Schiefergrau für Entwurf

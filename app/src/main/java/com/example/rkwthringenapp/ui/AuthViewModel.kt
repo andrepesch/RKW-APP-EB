@@ -25,7 +25,9 @@ data class AuthUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val info: String? = null,
-    val beraterId: Int? = null // NEU: Speichert die ID des eingeloggten Beraters
+    val beraterId: Int? = null,
+    val salutation: String? = null,
+    val lastName: String? = null
 )
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
@@ -41,7 +43,16 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private fun checkLoginStatus() {
         val loggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
         val beraterId = sharedPreferences.getInt("berater_id", -1).takeIf { it != -1 }
-        _uiState.update { it.copy(isLoggedIn = loggedIn, beraterId = beraterId) }
+        val salutation = sharedPreferences.getString("salutation", null)
+        val lastName = sharedPreferences.getString("last_name", null)
+        _uiState.update {
+            it.copy(
+                isLoggedIn = loggedIn,
+                beraterId = beraterId,
+                salutation = salutation,
+                lastName = lastName
+            )
+        }
     }
 
     fun testConnection() { /* ... unverändert ... */ }
@@ -120,8 +131,18 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                         sharedPreferences.edit()
                             .putBoolean("isLoggedIn", true)
                             .putInt("berater_id", loginResponse.berater_id ?: -1)
+                            .putString("salutation", loginResponse.salutation)
+                            .putString("last_name", loginResponse.last_name)
                             .apply()
-                        _uiState.update { it.copy(isLoading = false, isLoggedIn = true, beraterId = loginResponse.berater_id) }
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                isLoggedIn = true,
+                                beraterId = loginResponse.berater_id,
+                                salutation = loginResponse.salutation,
+                                lastName = loginResponse.last_name
+                            )
+                        }
                     } else {
                         login(email, password)
                     }
@@ -140,6 +161,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         sharedPreferences.edit()
             .putBoolean("isLoggedIn", false)
             .remove("berater_id")
+            .remove("salutation")
+            .remove("last_name")
             .apply()
         _uiState.update { AuthUiState() } // Setzt den kompletten Zustand zurück
     }

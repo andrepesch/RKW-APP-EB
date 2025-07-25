@@ -50,8 +50,8 @@ try {
     exit;
 }
 
-// Berater suchen und Passwort prüfen
-$stmt = $pdo->prepare("SELECT id, password_hash FROM berater WHERE email = ?");
+// Berater suchen und Passwort prüfen und Zusatzdaten mitliefern
+$stmt = $pdo->prepare("SELECT id, password_hash, salutation, last_name FROM berater WHERE email = ?");
 $stmt->execute([$email]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -61,7 +61,9 @@ if ($user && password_verify($password, $user['password_hash'])) {
     echo json_encode([
         'status' => 'success',
         'message' => 'Login erfolgreich.',
-        'berater_id' => $user['id'] // Wichtige Ergänzung
+        'berater_id' => $user['id'],
+        'salutation' => $user['salutation'] ?? null,
+        'last_name' => $user['last_name'] ?? null
     ]);
 } else {
     // Fehlgeschlagener Login
