@@ -9,6 +9,7 @@ import com.example.rkwthringenapp.data.ApiClient
 import com.example.rkwthringenapp.data.AuthRequest
 import com.example.rkwthringenapp.data.LoginResponse
 import com.example.rkwthringenapp.data.ServerResponse
+import com.example.rkwthringenapp.data.RegisterRequest
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -53,16 +54,55 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         performAuthRequest("https://formpilot.eu/login.php", email, password, isLogin = true)
     }
 
-    fun register(email: String, password: String) {
+    fun register(
+        email: String,
+        password: String,
+        salutation: String,
+        firstName: String,
+        lastName: String,
+        phone: String,
+        address: String,
+        photo: String? = null
+    ) {
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             _uiState.update { it.copy(error = "Bitte geben Sie eine gültige E-Mail-Adresse ein.") }
             return
         }
-        if (password.length < 8) {
-            _uiState.update { it.copy(error = "Das Passwort muss mindestens 8 Zeichen lang sein.") }
+        if (password.length < 8 || firstName.isBlank() || lastName.isBlank()) {
+            _uiState.update { it.copy(error = "Bitte füllen Sie alle Pflichtfelder korrekt aus.") }
             return
         }
-        performAuthRequest("https://formpilot.eu/register.php", email, password, isLogin = false)
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            try {
+                val response: HttpResponse = ApiClient.client.post("https://formpilot.eu/register.php") {
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        RegisterRequest(
+                            email = email,
+                            password = password,
+                            salutation = salutation,
+                            firstName = firstName,
+                            lastName = lastName,
+                            phone = phone,
+                            address = address,
+                            photo = photo
+                        )
+                    )
+                }
+
+                if (response.status == HttpStatusCode.OK) {
+                    login(email, password)
+                } else {
+                    val serverResponse: ServerResponse = response.body()
+                    _uiState.update { it.copy(isLoading = false, error = serverResponse.message) }
+                }
+            } catch (e: Exception) {
+                val errorMsg = e.message ?: "Unbekannter Fehler"
+                _uiState.update { it.copy(isLoading = false, error = "Client-Fehler: $errorMsg") }
+            }
+        }
     }
 
     private fun performAuthRequest(url: String, email: String, password: String, isLogin: Boolean) {
