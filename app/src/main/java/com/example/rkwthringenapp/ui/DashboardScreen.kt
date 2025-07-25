@@ -25,9 +25,12 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(navController: NavController, authViewModel: AuthViewModel) {
+fun DashboardScreen(
+    navController: NavController,
+    authViewModel: AuthViewModel,
+    rkwFormViewModel: RkwFormViewModel
+) {
     val dashboardViewModel: DashboardViewModel = viewModel()
-    val rkwFormViewModel: RkwFormViewModel = viewModel()
     val authState by authViewModel.uiState.collectAsState()
     val dashboardState by dashboardViewModel.uiState.collectAsState()
     val shareResult by dashboardViewModel.shareResult.collectAsState()
