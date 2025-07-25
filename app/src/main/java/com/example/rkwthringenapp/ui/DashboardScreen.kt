@@ -8,23 +8,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.rkwthringenapp.data.FormSummary
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(navController: NavController, authViewModel: AuthViewModel) {
     val dashboardViewModel: DashboardViewModel = viewModel()
@@ -65,9 +64,18 @@ fun DashboardScreen(navController: NavController, authViewModel: AuthViewModel) 
         authState.beraterId?.let { dashboardViewModel.loadForms(it) }
     }
 
+    var searchQuery by remember { mutableStateOf("") }
+
     Scaffold(
         topBar = {
-            RkwAppBar(title = "Meine Erfassungsbögen", actions = { TextButton(onClick = { authViewModel.logout() }) { Text("Logout") } })
+            CenterAlignedTopAppBar(
+                title = { Text("RKW Thüringen") },
+                actions = {
+                    IconButton(onClick = { authViewModel.logout() }) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Einstellungen")
+                    }
+                }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
@@ -79,40 +87,60 @@ fun DashboardScreen(navController: NavController, authViewModel: AuthViewModel) 
         },
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
     ) { paddingValues ->
-        Box(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-            contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
-            if (dashboardState.isLoading) {
-                CircularProgressIndicator()
-            } else if (dashboardState.error != null) {
-                Text("Fehler: ${dashboardState.error}", color = MaterialTheme.colorScheme.error)
-            } else if (dashboardState.forms.isEmpty()) {
-                Text("Keine Bögen gefunden.", textAlign = TextAlign.Center)
-            } else {
-                val groupedForms = dashboardState.forms.groupBy { it.status }
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    groupedForms["entwurf"]?.let { drafts ->
-                        item { Text("ENTWÜRFE", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp)) }
-                        items(drafts) { form ->
-                            FormCard(form = form, onClick = {
-                                rkwFormViewModel.loadDraft(form.id)
-                                navController.navigate("step1")
-                            }, onShareClick = {
-                                dashboardViewModel.shareForm(form.id)
-                            })
-                        }
-                    }
-                    groupedForms["gesendet"]?.let { sentForms ->
-                        item { Text("GESENDET", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp, top = 16.dp)) }
-                        items(sentForms) { form ->
-                            FormCard(form = form, onClick = {
-                                navController.navigate("sentFormDetail/${form.id}")
-                            }, onShareClick = {})
+            val greeting = "Hallo " + listOfNotNull(authState.salutation, authState.lastName).joinToString(" ")
+            Text(
+                text = greeting,
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            Text(
+                text = "Was möchten Sie tun?",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                placeholder = { Text("Firma suchen…") }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            when {
+                dashboardState.isLoading -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+                dashboardState.error != null -> Text(
+                    "Fehler: ${'$'}{dashboardState.error}",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(16.dp)
+                )
+                dashboardState.forms.isEmpty() -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Keine Bögen gefunden.") }
+                else -> {
+                    val filtered = dashboardState.forms.filter { it.companyName.contains(searchQuery, ignoreCase = true) }
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(filtered) { form ->
+                            FormCard(
+                                form = form,
+                                onClick = {
+                                    if (form.status == "entwurf") {
+                                        rkwFormViewModel.loadDraft(form.id)
+                                        navController.navigate("step1")
+                                    } else {
+                                        navController.navigate("sentFormDetail/${'$'}{form.id}")
+                                    }
+                                },
+                                onShareClick = { if (form.status == "entwurf") dashboardViewModel.shareForm(form.id) }
+                            )
                         }
                     }
                 }
@@ -123,56 +151,40 @@ fun DashboardScreen(navController: NavController, authViewModel: AuthViewModel) 
 
 @Composable
 fun FormCard(form: FormSummary, onClick: () -> Unit, onShareClick: () -> Unit) {
-    val headerColor = if (form.status == "entwurf") Color(0xFF004A5A) else Color(0xFF5A6A62)
-    val headerTextColor = Color.White
-    val bodyColor = MaterialTheme.colorScheme.surface
+    val isDraft = form.status == "entwurf"
+    val container = if (isDraft) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface
+    val textColor = if (isDraft) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
 
     Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(containerColor = bodyColor)
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = container),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column {
-            Box(
-                modifier = Modifier.fillMaxWidth().background(headerColor).padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 4.dp)
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = form.companyName,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = headerTextColor,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(1f)
-                    )
-                    // "Teilen"-Button nur für Entwürfe anzeigen
-                    if (form.status == "entwurf") {
-                        IconButton(onClick = onShareClick) {
-                            Icon(Icons.Outlined.Share, contentDescription = "Mit Kunde teilen", tint = headerTextColor)
-                        }
+                Text(
+                    text = form.companyName,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = textColor,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
+                )
+                if (isDraft) {
+                    IconButton(onClick = onShareClick) {
+                        Icon(Icons.Outlined.Share, contentDescription = "Mit Kunde teilen", tint = textColor)
                     }
                 }
             }
-
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(form.address, style = MaterialTheme.typography.bodyLarge)
-                Text(form.mainContact, style = MaterialTheme.typography.bodyLarge)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text("${form.scopeInDays} Tagwerk zu ${form.dailyRate} Euro", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = if (form.status == "entwurf") "letzte Bearbeitung ${formatDate(form.updated_at)}" else "gesendet am ${formatDate(form.updated_at)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
-                    fontSize = 10.sp
-                )
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(formatDate(form.updated_at), style = MaterialTheme.typography.bodySmall, color = textColor)
+                Text(if (isDraft) "Entwurf" else "Abgesendet", style = MaterialTheme.typography.bodySmall, color = textColor)
             }
         }
     }
