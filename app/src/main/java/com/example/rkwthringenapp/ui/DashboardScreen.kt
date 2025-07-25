@@ -141,7 +141,7 @@ fun DashboardScreen(
                                         rkwFormViewModel.loadDraft(form.id)
                                         navController.navigate("step1")
                                     } else {
-                                        navController.navigate("sentFormDetail/${'$'}{form.id}")
+                                        navController.navigate("sentFormDetail/${form.id}")
                                     }
                                 },
                                 onShareClick = { if (form.status == "entwurf") dashboardViewModel.shareForm(form.id) }
