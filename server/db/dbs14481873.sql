@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: database-5018260537.webspace-host.com
--- Erstellungszeit: 25. Jul 2025 um 11:12
+-- Erstellungszeit: 25. Jul 2025 um 11:45
 -- Server-Version: 8.0.36
 -- PHP-Version: 7.4.33
 
@@ -32,6 +32,12 @@ CREATE TABLE `berater` (
   `id` int NOT NULL,
   `email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `password_hash` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `salutation` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `first_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `last_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `phone` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `address` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `photo` text COLLATE utf8mb4_general_ci,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -39,8 +45,8 @@ CREATE TABLE `berater` (
 -- Daten für Tabelle `berater`
 --
 
-INSERT INTO `berater` (`id`, `email`, `password_hash`, `created_at`) VALUES
-(1, 'apollopro@aol.com', '$2y$10$zj2Q9TjmkGqZe300rAxNYOU2M8eP4IdL6j6uT/dBaDPBxame23bNy', '2025-07-23 07:28:05');
+INSERT INTO `berater` (`id`, `email`, `password_hash`, `salutation`, `first_name`, `last_name`, `phone`, `address`, `photo`, `created_at`) VALUES
+(1, 'apollopro@aol.com', '$2y$10$zj2Q9TjmkGqZe300rAxNYOU2M8eP4IdL6j6uT/dBaDPBxame23bNy', NULL, NULL, NULL, NULL, NULL, NULL, '2025-07-23 07:28:05');
 
 -- --------------------------------------------------------
 
