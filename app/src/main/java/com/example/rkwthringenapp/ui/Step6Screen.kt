@@ -37,6 +37,7 @@ fun Step6Screen(
     val formData by viewModel.uiState.collectAsState()
     val authState by authViewModel.uiState.collectAsState()
     val saveResult by viewModel.saveResult.collectAsState()
+    val deleteResult by viewModel.deleteResult.collectAsState()
     val context = LocalContext.current
 
     // Reagiert auf das Speicherergebnis
@@ -80,6 +81,52 @@ fun Step6Screen(
         is SaveResult.Idle -> { /* Nichts tun */ }
     }
 
+    when (val result = deleteResult) {
+        is DeleteResult.Loading -> {
+            AlertDialog(
+                onDismissRequest = {},
+                title = { Text("Löschen...") },
+                text = { Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) { CircularProgressIndicator() } },
+                confirmButton = {}
+            )
+        }
+        is DeleteResult.Success -> {
+            LaunchedEffect(result) {
+                Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
+                navController.navigate("dashboard") { popUpTo("dashboard") { inclusive = true } }
+                viewModel.clearDeleteResult()
+            }
+        }
+        is DeleteResult.Error -> {
+            AlertDialog(
+                onDismissRequest = { viewModel.clearDeleteResult() },
+                title = { Text("Fehler beim Löschen") },
+                text = { Text(result.message) },
+                confirmButton = { Button(onClick = { viewModel.clearDeleteResult() }) { Text("OK") } }
+            )
+        }
+        is DeleteResult.Idle -> {}
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Erfassungsbogen löschen") },
+            text = { Text("Möchten Sie den Erfassungsbogen wirklich löschen?") },
+            confirmButton = {
+                Button(onClick = {
+                    showDeleteConfirm = false
+                    formData.id?.let { viewModel.deleteForm(it) }
+                }) {
+                    Text("Erfassungsbogen löschen", maxLines = 1)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { showDeleteConfirm = false }) { Text("Abbrechen") }
+            }
+        )
+    }
+
     // --- Der Rest des Screens bleibt größtenteils gleich ---
     var tempImageUri by remember { mutableStateOf<Uri?>(null) }
     var showPublicationInfoDialog by remember { mutableStateOf(false) }
@@ -89,6 +136,7 @@ fun Step6Screen(
     val cameraPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted -> if (isGranted) { launchCamera() } }
 
     var menuExpanded by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -115,6 +163,13 @@ fun Step6Screen(
                         onClick = {
                             menuExpanded = false
                             authState.beraterId?.let { viewModel.saveForm("entwurf", it) }
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Erfassungsbogen löschen") },
+                        onClick = {
+                            menuExpanded = false
+                            showDeleteConfirm = true
                         }
                     )
                     DropdownMenuItem(

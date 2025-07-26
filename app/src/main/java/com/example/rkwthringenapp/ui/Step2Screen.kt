@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.rkwthringenapp.ui.util.DateVisualTransformation
 import com.example.rkwthringenapp.ui.util.TaxIdVisualTransformation
+import android.widget.Toast
 
 @Composable
 fun Step2Screen(
@@ -30,6 +32,63 @@ fun Step2Screen(
     val stepLabels = listOf("Unternehmensdaten", "Ansprechpartner", "Finanzdaten", "Beratung", "Berater", "Abschluss")
     val authState by authViewModel.uiState.collectAsState()
     var menuExpanded by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    val deleteResult by viewModel.deleteResult.collectAsState()
+    val context = LocalContext.current
+
+    when (val result = deleteResult) {
+        is DeleteResult.Loading -> {
+            AlertDialog(
+                onDismissRequest = {},
+                title = { Text("Löschen...") },
+                text = {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                        CircularProgressIndicator()
+                    }
+                },
+                confirmButton = {}
+            )
+        }
+        is DeleteResult.Success -> {
+            LaunchedEffect(result) {
+                Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
+                navController.navigate("dashboard") {
+                    popUpTo("dashboard") { inclusive = true }
+                }
+                viewModel.clearDeleteResult()
+            }
+        }
+        is DeleteResult.Error -> {
+            AlertDialog(
+                onDismissRequest = { viewModel.clearDeleteResult() },
+                title = { Text("Fehler beim Löschen") },
+                text = { Text(result.message) },
+                confirmButton = {
+                    Button(onClick = { viewModel.clearDeleteResult() }) { Text("OK") }
+                }
+            )
+        }
+        is DeleteResult.Idle -> {}
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Erfassungsbogen löschen") },
+            text = { Text("Möchten Sie den Erfassungsbogen wirklich löschen?") },
+            confirmButton = {
+                Button(onClick = {
+                    showDeleteConfirm = false
+                    formData.id?.let { viewModel.deleteForm(it) }
+                }) {
+                    Text("Erfassungsbogen löschen", maxLines = 1)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { showDeleteConfirm = false }) { Text("Abbrechen") }
+            }
+        )
+    }
 
     val legalFormsRequiringBeneficialOwners = listOf(
         "GmbH", "GmbH & Co. KG", "UG (haftungsbeschränkt)", "Kommanditgesellschaft (KG)",
@@ -64,6 +123,13 @@ fun Step2Screen(
                         onClick = {
                             menuExpanded = false
                             authState.beraterId?.let { viewModel.saveForm("entwurf", it) }
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Erfassungsbogen löschen") },
+                        onClick = {
+                            menuExpanded = false
+                            showDeleteConfirm = true
                         }
                     )
                     DropdownMenuItem(

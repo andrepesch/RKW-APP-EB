@@ -28,6 +28,13 @@ sealed class SaveResult {
     data class Error(val message: String) : SaveResult()
 }
 
+sealed class DeleteResult {
+    object Idle : DeleteResult()
+    object Loading : DeleteResult()
+    data class Success(val message: String) : DeleteResult()
+    data class Error(val message: String) : DeleteResult()
+}
+
 class RkwFormViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(RkwFormData())
@@ -35,6 +42,9 @@ class RkwFormViewModel(application: Application) : AndroidViewModel(application)
 
     private val _saveResult = MutableStateFlow<SaveResult>(SaveResult.Idle)
     val saveResult: StateFlow<SaveResult> = _saveResult.asStateFlow()
+
+    private val _deleteResult = MutableStateFlow<DeleteResult>(DeleteResult.Idle)
+    val deleteResult: StateFlow<DeleteResult> = _deleteResult.asStateFlow()
 
     private val _isLoadingDetails = MutableStateFlow(false)
     val isLoadingDetails: StateFlow<Boolean> = _isLoadingDetails.asStateFlow()
@@ -90,6 +100,29 @@ class RkwFormViewModel(application: Application) : AndroidViewModel(application)
                 _saveResult.value = SaveResult.Error("Client-Fehler: ${e.message}")
             }
         }
+    }
+
+    fun deleteForm(formId: Int) {
+        viewModelScope.launch {
+            _deleteResult.value = DeleteResult.Loading
+            try {
+                val response: ServerResponse = ApiClient.client.get("https://formpilot.eu/delete_form.php") {
+                    parameter("form_id", formId)
+                }.body()
+
+                if (response.status == "success") {
+                    _deleteResult.value = DeleteResult.Success(response.message)
+                } else {
+                    _deleteResult.value = DeleteResult.Error(response.message)
+                }
+            } catch (e: Exception) {
+                _deleteResult.value = DeleteResult.Error("Client-Fehler: ${e.message}")
+            }
+        }
+    }
+
+    fun clearDeleteResult() {
+        _deleteResult.value = DeleteResult.Idle
     }
 
     fun clearSaveResult() {
