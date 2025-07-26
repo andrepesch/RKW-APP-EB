@@ -121,24 +121,31 @@ fun Step6Screen(
             // Buttons, die jetzt durch den Ladezustand deaktiviert werden
             val isLoading = saveResult is SaveResult.Loading
             Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Button(onClick = { navController.popBackStack() }, enabled = !isLoading) { Text("Zurück") }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(
-                        onClick = { authState.beraterId?.let { viewModel.saveForm("entwurf", it) } },
-                        enabled = !isLoading
-                    ) {
-                        Text("Als Entwurf speichern")
-                    }
-                    Button(
-                        onClick = { authState.beraterId?.let { viewModel.saveForm("gesendet", it) } },
-                        enabled = !isLoading && formData.hasAcknowledgedPublicationObligations
-                    ) {
-                        Text("Final Senden")
-                    }
+                Button(
+                    onClick = { navController.popBackStack() },
+                    enabled = !isLoading,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Zurück")
+                }
+                OutlinedButton(
+                    onClick = { authState.beraterId?.let { viewModel.saveForm("entwurf", it) } },
+                    enabled = !isLoading,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Als Entwurf speichern")
+                }
+                Button(
+                    onClick = { authState.beraterId?.let { viewModel.saveForm("gesendet", it) } },
+                    enabled = !isLoading && formData.hasAcknowledgedPublicationObligations,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Final Senden")
                 }
             }
         }
