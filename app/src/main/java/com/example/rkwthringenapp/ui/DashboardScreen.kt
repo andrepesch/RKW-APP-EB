@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -68,16 +67,28 @@ fun DashboardScreen(
 
     var searchQuery by remember { mutableStateOf("") }
 
+    var menuExpanded by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
-            RkwAppBar(
-                title = "RKW Thüringen",
-                actions = {
-                    IconButton(onClick = { authViewModel.logout() }) {
-                        Icon(Icons.Filled.Settings, contentDescription = "Einstellungen")
-                    }
+            Box {
+                RkwAppBar(
+                    title = "RKW Thüringen",
+                    onMenuClick = { menuExpanded = true }
+                )
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Ausloggen") },
+                        onClick = {
+                            menuExpanded = false
+                            authViewModel.logout()
+                        }
+                    )
                 }
-            )
+            }
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
