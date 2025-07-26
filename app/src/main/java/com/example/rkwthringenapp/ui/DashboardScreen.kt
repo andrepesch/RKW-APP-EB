@@ -181,13 +181,13 @@ fun FormCard(form: FormSummary, onClick: () -> Unit, onShareClick: () -> Unit) {
                             color = App_Accent_Orange,
                             shape = RoundedCornerShape(bottomStart = 12.dp)
                         )
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .padding(horizontal = 12.dp, vertical = 2.dp)
                 )
             }
 
             Column(modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 48.dp)) {
+                .padding(start = 20.dp, end = 20.dp, top = 30.dp, bottom = 48.dp)) {
                 Text(
                     text = form.companyName,
                     style = MaterialTheme.typography.titleMedium,
@@ -197,9 +197,10 @@ fun FormCard(form: FormSummary, onClick: () -> Unit, onShareClick: () -> Unit) {
                 if (form.address.isNotBlank()) {
                     Text(
                         text = extractCity(form.address),
+                        fontSize = 14.sp,
                         style = MaterialTheme.typography.bodySmall,
                         color = App_Text_Gray,
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
             }
@@ -210,7 +211,7 @@ fun FormCard(form: FormSummary, onClick: () -> Unit, onShareClick: () -> Unit) {
                     .fillMaxWidth()
                     .align(Alignment.BottomStart)
                     .background(bottomBarColor)
-                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                    .padding(horizontal = 20.dp, vertical = 2.dp)
             ) {
                 Text(
                     text = if (isDraft) "Entwurf" else "Gesendet",
