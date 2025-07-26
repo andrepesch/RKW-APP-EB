@@ -170,4 +170,12 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     fun dismissError() {
         _uiState.update { it.copy(error = null, info = null) }
     }
+
+    fun updateLocalUserData(salutation: String?, lastName: String?) {
+        sharedPreferences.edit()
+            .putString("salutation", salutation)
+            .putString("last_name", lastName)
+            .apply()
+        _uiState.update { it.copy(salutation = salutation, lastName = lastName) }
+    }
 }

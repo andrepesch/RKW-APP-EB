@@ -83,6 +83,13 @@ fun DashboardScreen(
                     onDismissRequest = { menuExpanded = false }
                 ) {
                     DropdownMenuItem(
+                        text = { Text("Benutzerdaten ändern") },
+                        onClick = {
+                            menuExpanded = false
+                            navController.navigate("editProfile")
+                        }
+                    )
+                    DropdownMenuItem(
                         text = { Text("Ausloggen") },
                         onClick = {
                             menuExpanded = false

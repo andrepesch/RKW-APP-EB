@@ -24,6 +24,7 @@ fun AppNavigation() {
         composable("login") { LoginScreen(navController, authViewModel) }
         composable("register") { RegisterScreen(navController, authViewModel) }
         composable("dashboard") { DashboardScreen(navController, authViewModel, rkwViewModel) }
+        composable("editProfile") { EditProfileScreen(navController, authViewModel) }
 
         // Formular-Wizard
         composable("step1") { Step1Screen(navController, rkwViewModel, authViewModel) }
