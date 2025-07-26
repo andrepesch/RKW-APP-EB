@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -30,6 +31,7 @@ import com.example.rkwthringenapp.ui.theme.App_Accent_Orange
 fun RkwAppBar(
     title: String,
     onNavigationClick: (() -> Unit)? = null,
+    onMenuClick: (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     CenterAlignedTopAppBar(
@@ -44,13 +46,24 @@ fun RkwAppBar(
             }
         },
         navigationIcon = {
-            onNavigationClick?.let { callback ->
-                IconButton(onClick = callback) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Zurück",
-                        tint = Color.White
-                    )
+            when {
+                onNavigationClick != null -> {
+                    IconButton(onClick = onNavigationClick) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Zurück",
+                            tint = Color.White
+                        )
+                    }
+                }
+                onMenuClick != null -> {
+                    IconButton(onClick = onMenuClick) {
+                        Icon(
+                            Icons.Default.Menu,
+                            contentDescription = "Menü",
+                            tint = Color.White
+                        )
+                    }
                 }
             }
         },
