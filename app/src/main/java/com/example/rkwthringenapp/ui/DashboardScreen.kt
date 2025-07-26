@@ -13,10 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -99,9 +96,10 @@ fun DashboardScreen(
                     rkwFormViewModel.startNewForm()
                     navController.navigate("step1")
                 },
+                shape = MaterialTheme.shapes.medium,
                 containerColor = Color.White,
                 contentColor = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.primary, MaterialTheme.shapes.medium)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Neuen Bogen anlegen")
             }
