@@ -99,7 +99,7 @@ fun DetailSectionCard(title: String, icon: ImageVector, formData: RkwFormData) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(title, style = MaterialTheme.typography.titleLarge)
             }
-            Divider(modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             when (title) {
                 "Unternehmensdaten" -> {
