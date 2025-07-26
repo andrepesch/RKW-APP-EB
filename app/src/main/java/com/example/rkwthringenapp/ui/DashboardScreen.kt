@@ -73,8 +73,8 @@ fun DashboardScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("RKW Thüringen") },
+            RkwAppBar(
+                title = "RKW Thüringen",
                 actions = {
                     IconButton(onClick = { authViewModel.logout() }) {
                         Icon(Icons.Filled.Settings, contentDescription = "Einstellungen")

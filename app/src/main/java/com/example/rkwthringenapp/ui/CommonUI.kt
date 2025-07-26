@@ -4,6 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -21,14 +23,23 @@ import com.example.rkwthringenapp.R
 @Composable
 fun RkwAppBar(
     title: String,
-    actions: @Composable RowScope.() -> Unit = {} // Standardmäßig keine Aktionen
+    onNavigationClick: (() -> Unit)? = null,
+    actions: @Composable RowScope.() -> Unit = {}
 ) {
     TopAppBar(
         title = { Text(title, fontWeight = FontWeight.Bold) },
+        navigationIcon = {
+            onNavigationClick?.let { callback ->
+                IconButton(onClick = callback) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Zurück"
+                    )
+                }
+            }
+        },
         actions = {
-            // Hier werden die übergebenen Aktionen (z.B. Logout-Button) eingefügt
             actions()
-            // Das RKW-Logo wird immer angezeigt
             Image(
                 painter = painterResource(id = R.drawable.rkw_thueringen_wuerfel_grau),
                 contentDescription = "RKW Logo",

@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 // NEUE IMPORTS FÜR DIE ICONS
 import androidx.compose.material.icons.outlined.AccountBalance
 import androidx.compose.material.icons.outlined.Business
@@ -39,13 +38,9 @@ fun SentFormDetailScreen(navController: NavController, formId: Int) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Detailansicht") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Zurück")
-                    }
-                }
+            RkwAppBar(
+                title = "Detailansicht",
+                onNavigationClick = { navController.navigateUp() }
             )
         },
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
