@@ -133,16 +133,16 @@ fun Step6Screen(
                     Button(
                         onClick = { navController.popBackStack() },
                         enabled = !isLoading,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(0.4f)
                     ) {
                         Text("Zurück")
                     }
                     OutlinedButton(
                         onClick = { authState.beraterId?.let { viewModel.saveForm("entwurf", it) } },
                         enabled = !isLoading,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(0.6f)
                     ) {
-                        Text("Als Entwurf speichern")
+                        Text("Entwurf speichern")
                     }
                 }
                 Button(
