@@ -40,6 +40,8 @@ fun Step6Screen(
     val deleteResult by viewModel.deleteResult.collectAsState()
     val context = LocalContext.current
 
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
     // Reagiert auf das Speicherergebnis
     when (val result = saveResult) {
         is SaveResult.Loading -> {
@@ -136,7 +138,6 @@ fun Step6Screen(
     val cameraPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted -> if (isGranted) { launchCamera() } }
 
     var menuExpanded by remember { mutableStateOf(false) }
-    var showDeleteConfirm by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
