@@ -57,7 +57,7 @@ fun RkwAppBar(
         actions = {
             actions()
             Image(
-                painter = painterResource(id = R.drawable.rkw_thueringen_logo_grau),
+                painter = painterResource(id = R.drawable.rkw_thueringen_wuerfel_grau),
                 contentDescription = "RKW Logo",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
