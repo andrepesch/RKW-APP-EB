@@ -4,8 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.ui.Alignment
-import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -14,10 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import com.example.rkwthringenapp.R
-import com.example.rkwthringenapp.ui.theme.App_Accent_Orange
 
 /**
  * Eine wiederverwendbare TopAppBar für die gesamte App, die das RKW-Logo anzeigt.
@@ -31,24 +26,14 @@ fun RkwAppBar(
     onNavigationClick: (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
-    CenterAlignedTopAppBar(
-        title = {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        },
+    TopAppBar(
+        title = { Text(title, fontWeight = FontWeight.Bold) },
         navigationIcon = {
             onNavigationClick?.let { callback ->
                 IconButton(onClick = callback) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Zurück",
-                        tint = Color.White
+                        contentDescription = "Zurück"
                     )
                 }
             }
@@ -56,19 +41,16 @@ fun RkwAppBar(
         actions = {
             actions()
             Image(
-                painter = painterResource(id = R.drawable.rkw_thueringen_logo_grau),
+                painter = painterResource(id = R.drawable.rkw_thueringen_wuerfel_grau),
                 contentDescription = "RKW Logo",
-                contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .padding(end = 16.dp)
-                    .size(24.dp)
+                    .size(32.dp)
             )
         },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = App_Accent_Orange,
-            titleContentColor = Color.White,
-            navigationIconContentColor = Color.White,
-            actionIconContentColor = Color.White
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.background,
+            titleContentColor = MaterialTheme.colorScheme.onBackground
         )
     )
 }
