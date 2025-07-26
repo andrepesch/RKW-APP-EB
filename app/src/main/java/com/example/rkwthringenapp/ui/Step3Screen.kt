@@ -21,16 +21,57 @@ import com.example.rkwthringenapp.ui.util.IbanVisualTransformation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Step3Screen(navController: NavController, viewModel: RkwFormViewModel) {
+fun Step3Screen(
+    navController: NavController,
+    viewModel: RkwFormViewModel,
+    authViewModel: AuthViewModel
+) {
     val formData by viewModel.uiState.collectAsState()
     val isIbanError by viewModel.isIbanError.collectAsState()
     val stepLabels = listOf("Unternehmensdaten", "Ansprechpartner", "Finanzdaten", "Beratung", "Berater", "Abschluss")
 
     var penultimateYearVisible by remember { mutableStateOf(false) }
     var lastYearVisible by remember { mutableStateOf(false) }
+    val authState by authViewModel.uiState.collectAsState()
+    var menuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = { RkwAppBar(title = "Erfassungsbogen") }
+        topBar = {
+            Box {
+                RkwAppBar(
+                    title = "Erfassungsbogen",
+                    onMenuClick = { menuExpanded = true }
+                )
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Zurück zum Dashboard") },
+                        onClick = {
+                            menuExpanded = false
+                            navController.navigate("dashboard") {
+                                popUpTo("dashboard") { inclusive = true }
+                            }
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Entwurf speichern") },
+                        onClick = {
+                            menuExpanded = false
+                            authState.beraterId?.let { viewModel.saveForm("entwurf", it) }
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Ausloggen") },
+                        onClick = {
+                            menuExpanded = false
+                            authViewModel.logout()
+                        }
+                    )
+                }
+            }
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier

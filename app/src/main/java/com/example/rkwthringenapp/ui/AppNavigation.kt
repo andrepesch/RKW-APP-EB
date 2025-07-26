@@ -26,11 +26,11 @@ fun AppNavigation() {
         composable("dashboard") { DashboardScreen(navController, authViewModel, rkwViewModel) }
 
         // Formular-Wizard
-        composable("step1") { Step1Screen(navController, rkwViewModel) }
-        composable("step2") { Step2Screen(navController, rkwViewModel) }
-        composable("step3") { Step3Screen(navController, rkwViewModel) }
-        composable("step4") { Step4Screen(navController, rkwViewModel) }
-        composable("step5") { Step5Screen(navController, rkwViewModel) }
+        composable("step1") { Step1Screen(navController, rkwViewModel, authViewModel) }
+        composable("step2") { Step2Screen(navController, rkwViewModel, authViewModel) }
+        composable("step3") { Step3Screen(navController, rkwViewModel, authViewModel) }
+        composable("step4") { Step4Screen(navController, rkwViewModel, authViewModel) }
+        composable("step5") { Step5Screen(navController, rkwViewModel, authViewModel) }
         composable("step6") { Step6Screen(navController, rkwViewModel, authViewModel) }
 
         // NEUE ROUTE für die Detailansicht eines gesendeten Formulars

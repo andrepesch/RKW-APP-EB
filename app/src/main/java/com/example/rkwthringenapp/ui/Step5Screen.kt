@@ -15,13 +15,54 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun Step5Screen(navController: NavController, viewModel: RkwFormViewModel) {
+fun Step5Screen(
+    navController: NavController,
+    viewModel: RkwFormViewModel,
+    authViewModel: AuthViewModel
+) {
     val formData by viewModel.uiState.collectAsState()
     val consultantEmailErrors by viewModel.consultantEmailErrors.collectAsState()
     val stepLabels = listOf("Unternehmensdaten", "Ansprechpartner", "Finanzdaten", "Beratung", "Berater", "Abschluss")
+    val authState by authViewModel.uiState.collectAsState()
+    var menuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = { RkwAppBar(title = "Erfassungsbogen") }
+        topBar = {
+            Box {
+                RkwAppBar(
+                    title = "Erfassungsbogen",
+                    onMenuClick = { menuExpanded = true }
+                )
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Zurück zum Dashboard") },
+                        onClick = {
+                            menuExpanded = false
+                            navController.navigate("dashboard") {
+                                popUpTo("dashboard") { inclusive = true }
+                            }
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Entwurf speichern") },
+                        onClick = {
+                            menuExpanded = false
+                            authState.beraterId?.let { viewModel.saveForm("entwurf", it) }
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Ausloggen") },
+                        onClick = {
+                            menuExpanded = false
+                            authViewModel.logout()
+                        }
+                    )
+                }
+            }
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier

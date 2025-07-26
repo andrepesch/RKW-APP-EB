@@ -18,12 +18,18 @@ import com.example.rkwthringenapp.ui.util.DateVisualTransformation
 import com.example.rkwthringenapp.ui.util.TaxIdVisualTransformation
 
 @Composable
-fun Step2Screen(navController: NavController, viewModel: RkwFormViewModel) {
+fun Step2Screen(
+    navController: NavController,
+    viewModel: RkwFormViewModel,
+    authViewModel: AuthViewModel
+) {
     val formData by viewModel.uiState.collectAsState()
     val taxIdErrors by viewModel.taxIdErrors.collectAsState()
     val dateErrors by viewModel.beneficialOwnerDateErrors.collectAsState()
     val isMainContactEmailError by viewModel.isMainContactEmailError.collectAsState()
     val stepLabels = listOf("Unternehmensdaten", "Ansprechpartner", "Finanzdaten", "Beratung", "Berater", "Abschluss")
+    val authState by authViewModel.uiState.collectAsState()
+    var menuExpanded by remember { mutableStateOf(false) }
 
     val legalFormsRequiringBeneficialOwners = listOf(
         "GmbH", "GmbH & Co. KG", "UG (haftungsbeschränkt)", "Kommanditgesellschaft (KG)",
@@ -33,7 +39,44 @@ fun Step2Screen(navController: NavController, viewModel: RkwFormViewModel) {
     )
     val showBeneficialOwners = formData.legalForm in legalFormsRequiringBeneficialOwners
 
-    Scaffold(topBar = { RkwAppBar(title = "Erfassungsbogen") }) { paddingValues ->
+    Scaffold(
+        topBar = {
+            Box {
+                RkwAppBar(
+                    title = "Erfassungsbogen",
+                    onMenuClick = { menuExpanded = true }
+                )
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Zurück zum Dashboard") },
+                        onClick = {
+                            menuExpanded = false
+                            navController.navigate("dashboard") {
+                                popUpTo("dashboard") { inclusive = true }
+                            }
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Entwurf speichern") },
+                        onClick = {
+                            menuExpanded = false
+                            authState.beraterId?.let { viewModel.saveForm("entwurf", it) }
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Ausloggen") },
+                        onClick = {
+                            menuExpanded = false
+                            authViewModel.logout()
+                        }
+                    )
+                }
+            }
+        }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

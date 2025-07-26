@@ -15,7 +15,11 @@ import com.example.rkwthringenapp.ui.util.DateVisualTransformation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Step4Screen(navController: NavController, viewModel: RkwFormViewModel) {
+fun Step4Screen(
+    navController: NavController,
+    viewModel: RkwFormViewModel,
+    authViewModel: AuthViewModel
+) {
     val formData by viewModel.uiState.collectAsState()
     val details = formData.consultationDetails
     val isDailyRateError by viewModel.isDailyRateError.collectAsState()
@@ -40,12 +44,49 @@ fun Step4Screen(navController: NavController, viewModel: RkwFormViewModel) {
         "Digitalisierung"
     )
     val scopeOptions = (6..25).map { "$it Tage" }
+    val authState by authViewModel.uiState.collectAsState()
+    var menuExpanded by remember { mutableStateOf(false) }
 
     var focusDropdownExpanded by remember { mutableStateOf(false) }
     var scopeDropdownExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = { RkwAppBar(title = "Erfassungsbogen") }
+        topBar = {
+            Box {
+                RkwAppBar(
+                    title = "Erfassungsbogen",
+                    onMenuClick = { menuExpanded = true }
+                )
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Zurück zum Dashboard") },
+                        onClick = {
+                            menuExpanded = false
+                            navController.navigate("dashboard") {
+                                popUpTo("dashboard") { inclusive = true }
+                            }
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Entwurf speichern") },
+                        onClick = {
+                            menuExpanded = false
+                            authState.beraterId?.let { viewModel.saveForm("entwurf", it) }
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Ausloggen") },
+                        onClick = {
+                            menuExpanded = false
+                            authViewModel.logout()
+                        }
+                    )
+                }
+            }
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
