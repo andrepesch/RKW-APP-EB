@@ -22,10 +22,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.rkwthringenapp.data.FormSummary
 import com.example.rkwthringenapp.ui.theme.*
-import java.text.SimpleDateFormat
-import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     navController: NavController,
@@ -144,7 +141,6 @@ fun DashboardScreen(
                                         navController.navigate("sentFormDetail/${form.id}")
                                     }
                                 },
-                                onShareClick = { if (form.status == "entwurf") dashboardViewModel.shareForm(form.id) }
                             )
                         }
                     }
@@ -155,7 +151,7 @@ fun DashboardScreen(
 }
 
 @Composable
-fun FormCard(form: FormSummary, onClick: () -> Unit, onShareClick: () -> Unit) {
+fun FormCard(form: FormSummary, onClick: () -> Unit) {
     val isDraft = form.status == "entwurf"
 
     val bottomBarColor = if (isDraft) App_Status_Entwurf_Bar else App_Status_Gesendet_Bar
@@ -230,14 +226,4 @@ private fun extractCity(address: String): String {
     val afterComma = address.substringAfterLast(",").trim()
     val parts = afterComma.split(" ")
     return if (parts.isNotEmpty()) parts.last() else afterComma
-}
-
-fun formatDate(dateString: String): String {
-    return try {
-        val parser = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.GERMANY)
-        val formatter = SimpleDateFormat("dd.MM.yyyy", Locale.GERMANY)
-        formatter.format(parser.parse(dateString)!!)
-    } catch (e: Exception) {
-        dateString
-    }
 }
