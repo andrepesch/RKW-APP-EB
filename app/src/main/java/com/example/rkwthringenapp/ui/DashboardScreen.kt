@@ -221,13 +221,13 @@ fun FormCard(
                             color = App_Accent_Orange,
                             shape = RoundedCornerShape(bottomStart = 12.dp)
                         )
-                        .padding(horizontal = 12.dp, vertical = 2.dp)
+                        .padding(horizontal = 12.dp, vertical = 1.dp)
                 )
             }
 
             Column(modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, top = 30.dp, bottom = 48.dp)) {
+                .padding(start = 20.dp, end = 20.dp, top = 40.dp, bottom = 48.dp)) {
                 Text(
                     text = form.companyName,
                     style = MaterialTheme.typography.titleMedium,
@@ -251,7 +251,7 @@ fun FormCard(
                     .fillMaxWidth()
                     .align(Alignment.BottomStart)
                     .background(bottomBarColor)
-                    .padding(horizontal = 20.dp, vertical = 2.dp)
+                    .padding(horizontal = 20.dp, vertical = 1.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
