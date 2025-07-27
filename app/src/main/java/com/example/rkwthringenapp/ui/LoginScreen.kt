@@ -2,13 +2,14 @@ package com.example.rkwthringenapp.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -20,22 +21,22 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
     var password by remember { mutableStateOf("") }
     val uiState by authViewModel.uiState.collectAsState()
 
-    // Fehler-Dialog (unverändert)
+    // Zeige einen Fehler-Dialog an, wenn ein Fehler auftritt
     uiState.error?.let { error ->
         AlertDialog(
             onDismissRequest = { authViewModel.dismissError() },
             title = { Text("Fehler") },
             text = { Text(error) },
             confirmButton = {
-                Button(onClick = { authViewModel.dismissError() }) { Text("OK") }
+                Button(onClick = { authViewModel.dismissError() }) {
+                    Text("OK")
+                }
             }
         )
     }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background // Nutzt die neue Hintergrundfarbe
-    ) {
+    // Wir verwenden eine Surface anstelle des Scaffolds, um die TopAppBar zu entfernen
+    Surface(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -43,34 +44,39 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(32.dp),
+                    .padding(32.dp), // Mehr seitlicher Abstand
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // Das Logo, das auf dunklem Hintergrund gut funktioniert
+                // Hinzugefügtes RKW Logo
                 Image(
                     painter = painterResource(id = R.drawable.rkw_thueringen_logo_grau),
                     contentDescription = "RKW Thüringen Logo",
-                    modifier = Modifier.fillMaxWidth(0.7f)
+                    modifier = Modifier.fillMaxWidth(0.7f) // Logo füllt 70% der Breite
                 )
 
-                Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
+                // Angepasster Begrüßungstext
                 Text(
                     text = "Willkommen im Berater-Portal",
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge,
                     textAlign = TextAlign.Center
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Bitte melden Sie sich an, um fortzufahren.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
 
-                // Eingabefelder im neuen Stil
+                Spacer(modifier = Modifier.height(32.dp))
+
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
                     label = { Text("E-Mail") },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = !uiState.isLoading,
-                    shape = RoundedCornerShape(12.dp)
+                    enabled = !uiState.isLoading
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -79,18 +85,19 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                     onValueChange = { password = it },
                     label = { Text("Passwort") },
                     visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        autoCorrectEnabled = false
+                    ),
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = !uiState.isLoading,
-                    shape = RoundedCornerShape(12.dp)
+                    enabled = !uiState.isLoading
                 )
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Haupt-Button im neuen Stil
                 Button(
                     onClick = { authViewModel.login(email, password) },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
-                    enabled = !uiState.isLoading && email.isNotBlank() && password.isNotBlank(),
-                    shape = RoundedCornerShape(12.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !uiState.isLoading && email.isNotBlank() && password.isNotBlank()
                 ) {
                     Text("Anmelden")
                 }
@@ -103,6 +110,7 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
                 }
             }
 
+            // Zeige einen Lade-Indikator an
             if (uiState.isLoading) {
                 CircularProgressIndicator()
             }

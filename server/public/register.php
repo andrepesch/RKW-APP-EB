@@ -23,18 +23,40 @@ $key_base64 = require __DIR__ . '/../app_key.php';
 $json_data = file_get_contents('php://input');
 $data = json_decode($json_data);
 
-if (!$data || !isset($data->email) || !isset($data->password)) {
+if (
+    !$data ||
+    !isset($data->email) ||
+    !isset($data->password) ||
+    !isset($data->salutation) ||
+    !isset($data->firstName) ||
+    !isset($data->lastName) ||
+    !isset($data->address) ||
+    !isset($data->phone)
+) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Ungültige Eingabedaten.']);
     exit;
 }
 $email = $data->email;
 $password = $data->password;
+$salutation = $data->salutation;
+$firstName = trim($data->firstName);
+$lastName = trim($data->lastName);
+$address = trim($data->address);
+$phone = trim($data->phone);
+$photo = isset($data->photo) ? base64_decode($data->photo) : null;
 
 // 3. Eingaben validieren
-if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) < 8) {
+if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) < 8 || empty($firstName) || empty($lastName)) {
     http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'E-Mail ungültig oder Passwort zu kurz.']);
+    echo json_encode(['status' => 'error', 'message' => 'Ungültige Eingabedaten.']);
+    exit;
+}
+// optional: gültiges Salutation prüfen
+$allowedSalutations = ['Herr', 'Frau', 'Divers'];
+if (!in_array($salutation, $allowedSalutations)) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Anrede ungültig.']);
     exit;
 }
 
@@ -79,8 +101,8 @@ if ($stmt->fetch()) {
 
 // 8. Neuen Berater in die Datenbank einfügen
 try {
-    $stmt = $pdo->prepare("INSERT INTO berater (email, password_hash) VALUES (?, ?)");
-    $stmt->execute([$email, $password_hash]);
+    $stmt = $pdo->prepare("INSERT INTO berater (email, password_hash, salutation, first_name, last_name, address, phone, photo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$email, $password_hash, $salutation, $firstName, $lastName, $address, $phone, $photo]);
     echo json_encode(['status' => 'success', 'message' => 'Registrierung erfolgreich.']);
 } catch (PDOException $e) {
     http_response_code(500);
