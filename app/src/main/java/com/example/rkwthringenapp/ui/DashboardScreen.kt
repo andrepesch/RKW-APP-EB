@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -175,6 +176,11 @@ fun DashboardScreen(
                                         navController.navigate("sentFormDetail/${form.id}")
                                     }
                                 },
+                                onShareClick = {
+                                    if (form.status == "entwurf") {
+                                        dashboardViewModel.shareForm(form.id)
+                                    }
+                                }
                             )
                         }
                     }
@@ -185,7 +191,11 @@ fun DashboardScreen(
 }
 
 @Composable
-fun FormCard(form: FormSummary, onClick: () -> Unit) {
+fun FormCard(
+    form: FormSummary,
+    onClick: () -> Unit,
+    onShareClick: () -> Unit
+) {
     val isDraft = form.status == "entwurf"
 
     val bottomBarColor = if (isDraft) App_Status_Entwurf_Bar else App_Status_Gesendet_Bar
@@ -235,7 +245,7 @@ fun FormCard(form: FormSummary, onClick: () -> Unit) {
                 }
             }
 
-            // Bottom status bar
+            // Bottom status bar with optional share action
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -243,14 +253,28 @@ fun FormCard(form: FormSummary, onClick: () -> Unit) {
                     .background(bottomBarColor)
                     .padding(horizontal = 20.dp, vertical = 2.dp)
             ) {
-                Text(
-                    text = if (isDraft) "Entwurf" else "Gesendet",
-                    color = bottomTextColor,
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp,
-                    modifier = Modifier.align(Alignment.CenterStart)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = if (isDraft) "Entwurf" else "Gesendet",
+                        color = bottomTextColor,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+                    if (isDraft) {
+                        IconButton(onClick = onShareClick) {
+                            Icon(
+                                imageVector = Icons.Outlined.Share,
+                                contentDescription = "Mit Kunde teilen",
+                                tint = bottomTextColor
+                            )
+                        }
+                    }
+                }
             }
         }
     }
