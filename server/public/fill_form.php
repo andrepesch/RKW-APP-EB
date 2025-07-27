@@ -165,6 +165,52 @@
 
         .hidden { display: none; }
 
+        .info-box {
+            display: flex;
+            gap: 0.5rem;
+            background-color: rgba(230, 68, 21, 0.1);
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .info-box .icon {
+            color: var(--rkw-orange);
+            font-weight: bold;
+        }
+
+        .info-icon {
+            cursor: pointer;
+            margin-left: 0.25rem;
+            color: var(--rkw-orange);
+        }
+
+        .error-text {
+            color: var(--rkw-error-red);
+            font-size: 0.9rem;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+        }
+
         #message-container {
             text-align: center;
             padding: 2rem;
@@ -198,7 +244,7 @@
         <main>
             <div id="loader" class="spinner"></div>
             <form id="customer-form" class="hidden">
-                <div class="form-section">
+                <div class="form-section" id="owners-section">
                     <h4>Unternehmensdaten</h4>
                     <label for="companyName">Unternehmensname:</label>
                     <input type="text" id="companyName" name="companyName" required>
@@ -244,6 +290,7 @@
 
                 <div class="form-section">
                     <h4>Wirtschaftlich Berechtigte Personen</h4>
+                    <div class="info-box"><span class="icon">i</span><span>Wirtschaftlich berechtigte Personen gemäß § 3 GwG (Eintragung im Transparenzregister): Nicht automatisch vertretungsberechtigte Personen. Maßgeblich ist die tatsächliche Kontrolle, z. B. durch Kapital- oder Stimmrechte.</span></div>
                     <div id="owners-container"></div>
                     <button type="button" id="add-owner">Weitere Person hinzufügen</button>
                 </div>
@@ -262,11 +309,12 @@
 
                 <div class="form-section">
                     <h4>KMU-Bewertung</h4>
+                    <div class="info-box"><span class="icon">i</span><span>Die Einstufung als kleines oder mittleres Unternehmen (KMU) ist Voraussetzung für den Zugang zu vielen Förderprogrammen. Die Angaben der letzten beiden abgeschlossenen Geschäftsjahre sind dafür entscheidend.</span></div>
                     <h5>Letztes Jahr</h5>
                     <label for="lastYearYear">Abschlussjahr:</label>
                     <input type="text" id="lastYearYear" name="lastYearYear">
 
-                    <label for="lastYearEmployees">Mitarbeiter:</label>
+                    <label for="lastYearEmployees">Mitarbeiter:<span class="info-icon" data-info="employee">?</span></label>
                     <input type="number" id="lastYearEmployees" name="lastYearEmployees">
 
                     <label for="lastYearTurnover">Umsatz (€):</label>
@@ -320,12 +368,18 @@
                 </div>
 
                 <div class="form-section">
-                    <label><input type="checkbox" id="hasAcknowledged" name="hasAcknowledged"> Publizitätsverpflichtungen zur Kenntnis genommen</label>
+                    <label><input type="checkbox" id="hasAcknowledged" name="hasAcknowledged"> Publizitätsverpflichtungen zur Kenntnis genommen<span class="info-icon" data-info="publication">?</span></label>
                 </div>
 
                 <button type="submit" id="submit-button">Änderungen speichern und zurücksenden</button>
             </form>
             <div id="message-container"></div>
+            <div id="info-modal" class="modal hidden">
+                <div class="modal-content">
+                    <button id="modal-close" class="info-icon">X</button>
+                    <div id="modal-text"></div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -339,6 +393,69 @@
             const addOwnerBtn = document.getElementById('add-owner');
             const consultantsContainer = document.getElementById('consultants-container');
             const addConsultantBtn = document.getElementById('add-consultant');
+            const ownersSection = document.getElementById('owners-section');
+            const modal = document.getElementById('info-modal');
+            const modalText = document.getElementById('modal-text');
+            const modalClose = document.getElementById('modal-close');
+
+            const infoTexts = {
+                employee: `Die Mitarbeiterzahl wird in Jahresarbeitseinheiten (JAE) ausgedrückt.\nEinbezogen werden:\n- Lohn- und Gehaltsempfänger\n- für das Unternehmen tätige Personen, die in einem Unterordnungsverhältnis zu diesem stehen und nach nationalem Recht Arbeitnehmern gleichgestellt sind\n- mitarbeitende Eigentümer\n- Teilhaber, die eine regelmäßige Tätigkeit im Unternehmen ausüben und finanzielle Vorteile ziehen.\nNicht einbezogen werden:\n- Auszubildende oder Studenten in der beruflichen Ausbildung\n- Arbeitnehmer im Mutterschafts- oder Elternurlaub\nBeispiel:\n1 Vollzeitkraft = 1,0 JAE\n3 Teilzeitkräfte (50%) = 1,5 JAE\n1 Saisonkraft (3 Mon.) = 0,25 JAE\n= Insgesamt 2,75 JAE`,
+                publication: 'Die Beratungsergebnisse unterliegen Publizitätsverpflichtungen. Bitte beachten Sie die Hinweise der Förder-Richtlinie.'
+            };
+
+            function showModal(text) {
+                modalText.textContent = text;
+                modal.classList.remove('hidden');
+            }
+            modalClose.addEventListener('click', () => modal.classList.add('hidden'));
+            modal.addEventListener('click', e => { if (e.target === modal) modal.classList.add('hidden'); });
+            document.querySelectorAll('.info-icon').forEach(icon => {
+                icon.addEventListener('click', () => {
+                    const t = infoTexts[icon.dataset.info];
+                    if (t) showModal(t);
+                });
+            });
+
+            const legalFormsWithOwners = ['GmbH','GmbH & Co. KG','UG (haftungsbeschränkt)','Kommanditgesellschaft (KG)','Offene Handelsgesellschaft (OHG)','Aktiengesellschaft (AG)','Limited (Ltd.)','Ltd. & Co. KG','Eingetragene Genossenschaft (eG)','KG auf Aktien (KGaA)','Partnerschaftsgesellschaft','Societas Europaea (SE)','Stiftung'];
+            document.getElementById('legalForm').addEventListener('input', e => {
+                if (legalFormsWithOwners.includes(e.target.value.trim())) {
+                    ownersSection.style.display = '';
+                } else {
+                    ownersSection.style.display = 'none';
+                    ownersContainer.innerHTML = '';
+                }
+            });
+
+            function validateForm() {
+                let valid = true;
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                function check(el, condition, msg) {
+                    let err = el.nextElementSibling;
+                    if (!err || !err.classList.contains('error-text')) {
+                        err = document.createElement('div');
+                        err.className = 'error-text';
+                        el.after(err);
+                    }
+                    if (condition) { err.textContent = msg; valid = false; } else { err.textContent = ''; }
+                }
+                check(document.getElementById('mainContactEmail'), !emailPattern.test(document.getElementById('mainContactEmail').value), 'E-Mail-Adresse ungültig');
+                check(document.getElementById('postalCode'), !/^\d{5}$/.test(document.getElementById('postalCode').value), 'PLZ ungültig');
+                const rateVal = parseInt(document.getElementById('consultRate').value.replace(/\D/g,'')) || 0;
+                check(document.getElementById('consultRate'), rateVal>0 && rateVal < 600, 'Mind. 600 €');
+                check(document.getElementById('consultEndDate'), document.getElementById('consultEndDate').value && !/^\d{8}$/.test(document.getElementById('consultEndDate').value), 'Datum ungültig');
+                check(document.getElementById('bankIban'), document.getElementById('bankIban').value && !/^[A-Z0-9]{15,34}$/.test(document.getElementById('bankIban').value.replace(/\s+/g,'')), 'IBAN ungültig');
+                ownersContainer.querySelectorAll('.owner-item').forEach(div => {
+                    const bd = div.querySelector('.owner-birthDate');
+                    const tid = div.querySelector('.owner-taxId');
+                    check(bd, bd.value && !/^\d{8}$/.test(bd.value), 'Datum ungültig');
+                    check(tid, tid.value && tid.value.replace(/\D/g,'').length !== 11, 'Steuer-ID ungültig');
+                });
+                consultantsContainer.querySelectorAll('.consultant-item').forEach(div => {
+                    const em = div.querySelector('.consultant-email');
+                    check(em, em.value && !emailPattern.test(em.value), 'E-Mail-Adresse ungültig');
+                });
+                return valid;
+            }
 
             let originalFormData = {};
 
@@ -442,6 +559,10 @@
 
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
+                if (!validateForm()) {
+                    messageContainer.innerHTML = '<p class="error-message">Bitte prüfen Sie die markierten Felder.</p>';
+                    return;
+                }
                 submitButton.disabled = true;
                 submitButton.innerText = 'Speichert...';
                 messageContainer.innerHTML = '';
