@@ -185,7 +185,7 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !uiState.isLoading,
-                    isError = password != confirmPassword && confirmPassword.isNotEmpty()
+                    isError = password.trim() != confirmPassword.trim() && confirmPassword.isNotEmpty()
                 )
                 Spacer(modifier = Modifier.height(32.dp))
 
@@ -205,8 +205,8 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !uiState.isLoading &&
                         email.isNotBlank() &&
-                        password.length >= 8 &&
-                        password == confirmPassword &&
+                        password.trim().length >= 8 &&
+                        password.trim() == confirmPassword.trim() &&
                         firstName.isNotBlank() &&
                         lastName.isNotBlank()
                 ) {

@@ -64,12 +64,13 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun changePassword(beraterId: Int, password: String) {
+        val trimmedPassword = password.trim()
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null, info = null) }
             try {
                 val response: HttpResponse = ApiClient.client.post("https://formpilot.eu/change_password.php") {
                     contentType(ContentType.Application.Json)
-                    setBody(PasswordChangeRequest(beraterId, password))
+                    setBody(PasswordChangeRequest(beraterId, trimmedPassword))
                 }
                 val serverResp: ServerResponse = response.body()
                 if (serverResp.status == "success") {

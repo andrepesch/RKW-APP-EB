@@ -103,15 +103,15 @@ fun EditProfileScreen(navController: NavController, authViewModel: AuthViewModel
                             keyboardType = KeyboardType.Password,
                             autoCorrectEnabled = false
                         ),
-                        isError = newPassword != confirmPassword && confirmPassword.isNotEmpty()
+                        isError = newPassword.trim() != confirmPassword.trim() && confirmPassword.isNotEmpty()
                     )
                 }
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        if (newPassword == confirmPassword && newPassword.length >= 8) {
-                            authState.beraterId?.let { profileViewModel.changePassword(it, newPassword) }
+                        if (newPassword.trim() == confirmPassword.trim() && newPassword.trim().length >= 8) {
+                            authState.beraterId?.let { profileViewModel.changePassword(it, newPassword.trim()) }
                             showPasswordDialog = false
                             newPassword = ""
                             confirmPassword = ""

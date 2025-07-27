@@ -58,11 +58,18 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     fun testConnection() { /* ... unverändert ... */ }
 
     fun login(email: String, password: String) {
-        if (email.isBlank() || password.isBlank()) {
+        val trimmedEmail = email.trim()
+        val trimmedPassword = password.trim()
+        if (trimmedEmail.isBlank() || trimmedPassword.isBlank()) {
             _uiState.update { it.copy(error = "Bitte füllen Sie alle Felder aus.") }
             return
         }
-        performAuthRequest("https://formpilot.eu/login.php", email, password, isLogin = true)
+        performAuthRequest(
+            "https://formpilot.eu/login.php",
+            trimmedEmail,
+            trimmedPassword,
+            isLogin = true
+        )
     }
 
     fun register(
@@ -75,11 +82,14 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         address: String,
         photo: String? = null
     ) {
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        val trimmedEmail = email.trim()
+        val trimmedPassword = password.trim()
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(trimmedEmail).matches()) {
             _uiState.update { it.copy(error = "Bitte geben Sie eine gültige E-Mail-Adresse ein.") }
             return
         }
-        if (password.length < 8 || firstName.isBlank() || lastName.isBlank()) {
+        if (trimmedPassword.length < 8 || firstName.isBlank() || lastName.isBlank()) {
             _uiState.update { it.copy(error = "Bitte füllen Sie alle Pflichtfelder korrekt aus.") }
             return
         }
@@ -91,8 +101,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     contentType(ContentType.Application.Json)
                     setBody(
                         RegisterRequest(
-                            email = email,
-                            password = password,
+                            email = trimmedEmail,
+                            password = trimmedPassword,
                             salutation = salutation,
                             firstName = firstName,
                             lastName = lastName,
@@ -104,7 +114,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 if (response.status == HttpStatusCode.OK) {
-                    login(email, password)
+                    login(trimmedEmail, trimmedPassword)
                 } else {
                     val serverResponse: ServerResponse = response.body()
                     _uiState.update { it.copy(isLoading = false, error = serverResponse.message) }
