@@ -147,8 +147,12 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                         val loginResponse = try {
                             Json.decodeFromString<LoginResponse>(body)
                         } catch (_: Exception) {
-                            // server did not return JSON
-                            val msg = if (body.isNotBlank()) body else "Ungültige Antwort"
+                            // Server hat keine gültige JSON-Antwort geliefert
+                            val msg = if (body.isNotBlank()) {
+                                body
+                            } else {
+                                "Ungültige Antwort vom Server (Status ${response.status.value})"
+                            }
                             _uiState.update { it.copy(isLoading = false, error = msg) }
                             return@launch
                         }
