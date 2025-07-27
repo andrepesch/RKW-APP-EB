@@ -91,7 +91,7 @@ fun EditProfileScreen(navController: NavController, authViewModel: AuthViewModel
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
-                            autoCorrect = false
+                            autoCorrectEnabled = false
                         )
                     )
                     OutlinedTextField(
@@ -101,7 +101,7 @@ fun EditProfileScreen(navController: NavController, authViewModel: AuthViewModel
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
-                            autoCorrect = false
+                            autoCorrectEnabled = false
                         ),
                         isError = newPassword != confirmPassword && confirmPassword.isNotEmpty()
                     )

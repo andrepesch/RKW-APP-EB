@@ -167,7 +167,7 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
-                        autoCorrect = false
+                        autoCorrectEnabled = false
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !uiState.isLoading
@@ -181,7 +181,7 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
-                        autoCorrect = false
+                        autoCorrectEnabled = false
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !uiState.isLoading,
