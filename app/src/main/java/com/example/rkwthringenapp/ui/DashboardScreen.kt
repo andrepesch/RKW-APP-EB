@@ -225,15 +225,32 @@ fun FormCard(
                 )
             }
 
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, top = 40.dp, bottom = 48.dp)) {
-                Text(
-                    text = form.companyName,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = App_Text_Black,
-                    fontWeight = FontWeight.Bold
-                )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 20.dp, top = 40.dp, bottom = 48.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = form.companyName,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = App_Text_Black,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (isDraft) {
+                        IconButton(onClick = onShareClick) {
+                            Icon(
+                                imageVector = Icons.Outlined.Share,
+                                contentDescription = "Mit Kunde teilen",
+                                tint = App_Text_Black
+                            )
+                        }
+                    }
+                }
                 if (form.address.isNotBlank()) {
                     Text(
                         text = extractCity(form.address),
@@ -263,17 +280,9 @@ fun FormCard(
                         color = bottomTextColor,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
+                        letterSpacing = 2.sp
                     )
-                    if (isDraft) {
-                        IconButton(onClick = onShareClick) {
-                            Icon(
-                                imageVector = Icons.Outlined.Share,
-                                contentDescription = "Mit Kunde teilen",
-                                tint = bottomTextColor
-                            )
-                        }
-                    }
+                    // Share button moved to the main section of the card
                 }
             }
         }
