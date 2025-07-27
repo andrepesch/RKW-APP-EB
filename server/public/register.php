@@ -37,8 +37,8 @@ if (
     echo json_encode(['status' => 'error', 'message' => 'Ungültige Eingabedaten.']);
     exit;
 }
-$email = $data->email;
-$password = $data->password;
+$email = trim($data->email);
+$password = trim($data->password);
 $salutation = $data->salutation;
 $firstName = trim($data->firstName);
 $lastName = trim($data->lastName);

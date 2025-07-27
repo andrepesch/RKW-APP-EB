@@ -13,7 +13,7 @@ if (!$data || !isset($data->beraterId) || !isset($data->password)) {
     exit;
 }
 $beraterId = $data->beraterId;
-$password = $data->password;
+$password = trim($data->password);
 if (strlen($password) < 8) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Passwort zu kurz.']);
