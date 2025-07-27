@@ -23,8 +23,8 @@ if (!$data || !isset($data->email) || !isset($data->password)) {
     echo json_encode(['status' => 'error', 'message' => 'E-Mail oder Passwort fehlt.']);
     exit;
 }
-$email = trim($data->email);
-$password = trim($data->password);
+$email = $data->email;
+$password = $data->password;
 
 // DB-Passwort entschlüsseln
 try {
@@ -48,4 +48,23 @@ try {
     http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => 'DB-Verbindung fehlgeschlagen: ' . $e->getMessage()]);
     exit;
+}
+
+// Berater suchen und Passwort prüfen
+$stmt = $pdo->prepare("SELECT id, password_hash FROM berater WHERE email = ?");
+$stmt->execute([$email]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($user && password_verify($password, $user['password_hash'])) {
+    // Erfolgreicher Login
+    // NEU: Sende die Berater-ID zurück an die App
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Login erfolgreich.',
+        'berater_id' => $user['id'] // Wichtige Ergänzung
+    ]);
+} else {
+    // Fehlgeschlagener Login
+    http_response_code(401);
+    echo json_encode(['status' => 'error', 'message' => 'E-Mail oder Passwort ist falsch.']);
 }
