@@ -10,6 +10,7 @@ import com.example.rkwthringenapp.data.AuthRequest
 import com.example.rkwthringenapp.data.LoginResponse
 import com.example.rkwthringenapp.data.ServerResponse
 import com.example.rkwthringenapp.data.RegisterRequest
+import kotlinx.serialization.json.Json
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -116,7 +117,12 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 if (response.status == HttpStatusCode.OK) {
                     login(trimmedEmail, trimmedPassword)
                 } else {
-                    val serverResponse: ServerResponse = response.body()
+                    val body = response.bodyAsText()
+                    val serverResponse = try {
+                        Json.decodeFromString<ServerResponse>(body)
+                    } catch (_: Exception) {
+                        ServerResponse("error", body)
+                    }
                     _uiState.update { it.copy(isLoading = false, error = serverResponse.message) }
                 }
             } catch (e: Exception) {
@@ -137,7 +143,15 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
                 if (response.status == HttpStatusCode.OK) {
                     if (isLogin) {
-                        val loginResponse: LoginResponse = response.body()
+                        val body = response.bodyAsText()
+                        val loginResponse = try {
+                            Json.decodeFromString<LoginResponse>(body)
+                        } catch (_: Exception) {
+                            // server did not return JSON
+                            val msg = if (body.isNotBlank()) body else "Ungültige Antwort"
+                            _uiState.update { it.copy(isLoading = false, error = msg) }
+                            return@launch
+                        }
                         sharedPreferences.edit()
                             .putBoolean("isLoggedIn", true)
                             .putInt("berater_id", loginResponse.berater_id ?: -1)
@@ -157,7 +171,12 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                         login(email, password)
                     }
                 } else {
-                    val serverResponse: ServerResponse = response.body()
+                    val body = response.bodyAsText()
+                    val serverResponse = try {
+                        Json.decodeFromString<ServerResponse>(body)
+                    } catch (_: Exception) {
+                        ServerResponse("error", body)
+                    }
                     _uiState.update { it.copy(isLoading = false, error = serverResponse.message) }
                 }
             } catch (e: Exception) {

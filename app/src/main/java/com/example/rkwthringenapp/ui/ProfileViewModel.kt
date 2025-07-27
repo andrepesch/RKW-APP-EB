@@ -8,6 +8,7 @@ import com.example.rkwthringenapp.data.PasswordChangeRequest
 import com.example.rkwthringenapp.data.UpdateProfileRequest
 import com.example.rkwthringenapp.data.UserProfile
 import com.example.rkwthringenapp.data.ServerResponse
+import kotlinx.serialization.json.Json
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -51,7 +52,12 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }
-                val serverResp: ServerResponse = response.body()
+                val body = response.bodyAsText()
+                val serverResp = try {
+                    Json.decodeFromString<ServerResponse>(body)
+                } catch (_: Exception) {
+                    ServerResponse("error", body)
+                }
                 if (serverResp.status == "success") {
                     _uiState.update { it.copy(isLoading = false, info = serverResp.message) }
                 } else {
@@ -72,7 +78,12 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                     contentType(ContentType.Application.Json)
                     setBody(PasswordChangeRequest(beraterId, trimmedPassword))
                 }
-                val serverResp: ServerResponse = response.body()
+                val body = response.bodyAsText()
+                val serverResp = try {
+                    Json.decodeFromString<ServerResponse>(body)
+                } catch (_: Exception) {
+                    ServerResponse("error", body)
+                }
                 if (serverResp.status == "success") {
                     _uiState.update { it.copy(isLoading = false, info = serverResp.message) }
                 } else {
