@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -163,6 +165,10 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
                     onValueChange = { password = it },
                     label = { Text("Passwort (mind. 8 Zeichen)") },
                     visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        autoCorrect = false
+                    ),
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !uiState.isLoading
                 )
@@ -173,6 +179,10 @@ fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
                     onValueChange = { confirmPassword = it },
                     label = { Text("Passwort bestätigen") },
                     visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        autoCorrect = false
+                    ),
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !uiState.isLoading,
                     isError = password != confirmPassword && confirmPassword.isNotEmpty()
